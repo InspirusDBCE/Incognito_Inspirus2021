@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "750873408706",
+    "firebase_url": "https://soundprofileconverter-default-rtdb.firebaseio.com",
+    "project_id": "soundprofileconverter",
+    "storage_bucket": "soundprofileconverter.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:750873408706:android:8d73f089d231ebf02db75b",
+        "android_client_info": {
+          "package_name": "com.incognito.soundprofileconverter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "750873408706-47bf752f2dpl0m91ed3r9flj54ifnkl4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSP0SK4_5t_zkbmCSzvXckE3XyrE3jtok"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "750873408706-47bf752f2dpl0m91ed3r9flj54ifnkl4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
