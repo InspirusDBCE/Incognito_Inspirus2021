@@ -23,13 +23,6 @@ public class IncomingSms extends BroadcastReceiver {
         final DBHandler dbHandler = new DBHandler(context);
          ArrayList<WhitelistedContacts> whitelistedContacts = dbHandler.getContacts();
 
-         /// To delete
-        if (whitelistedContacts.size() == 0) {
-            dbHandler.addNewContact("Saish Naik", "+919527767505");
-            dbHandler.addNewContact("Rajdick Kerkar", "+919822975781");
-            whitelistedContacts = dbHandler.getContacts();
-        }
-
         try {
 
             if (bundle != null) {

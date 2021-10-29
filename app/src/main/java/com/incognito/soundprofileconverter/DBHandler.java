@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -17,7 +18,7 @@ public class DBHandler extends SQLiteOpenHelper {
     private static final String TABLE_NAME = "whitelisted_contacts";
     private static final String ID_COL = "id";
     private static final String NAME_COL = "name";
-    private static final String PHONE_NUM_COL = "duration";
+    private static final String PHONE_NUM_COL = "phone_num";
 
     public DBHandler(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -39,16 +40,50 @@ public class DBHandler extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void addNewContact(String name, String phoneNumber) {
+    public void removeContact(WhitelistedContacts contact) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DELETE FROM "+ TABLE_NAME + " WHERE " +
+                PHONE_NUM_COL + " = \""+contact.getContactPhoneNumber()+"\"");
+        db.close();
+    }
+
+    public int addNewContact(WhitelistedContacts contact) {
+        if (getContact(contact) != null) {
+            return -1;
+        }
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        values.put(NAME_COL, name);
-        values.put(PHONE_NUM_COL, phoneNumber);
+        values.put(NAME_COL, contact.getContactName());
+        values.put(PHONE_NUM_COL, contact.getContactPhoneNumber());
 
         db.insert(TABLE_NAME, null, values);
 
         db.close();
+        Log.i("SQLite: Added ", contact.getContactName());
+
+        return 1;
+    }
+
+    public WhitelistedContacts getContact(WhitelistedContacts contact) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " +
+                PHONE_NUM_COL + " = \""+contact.getContactPhoneNumber()+"\"", null);
+
+        WhitelistedContacts mcontact = null;
+
+        if (cursor.moveToFirst()) {
+            do {
+                Log.i("DB", "Inside");
+                mcontact = new WhitelistedContacts(
+                        cursor.getString(1),
+                        cursor.getString(2));
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        return mcontact;
     }
 
     public ArrayList<WhitelistedContacts> getContacts() {

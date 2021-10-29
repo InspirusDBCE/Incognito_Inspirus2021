@@ -12,9 +12,17 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.incognito.soundprofileconverter.adapter.RecyclerViewAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,36 +30,66 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final static int ON_DO_NOT_DISTURB_CALLBACK_CODE = 1;
+    private static final int
+            ON_DO_NOT_DISTURB_CALLBACK_CODE = 1000,
+            RESULT_PICK_CONTACT = 1001;
+
     private final static int REQUEST_CODE_ASK_PERMISSIONS = 1;
     private static final String[] REQUIRED_SDK_PERMISSIONS = new String[] {
             Manifest.permission.RECEIVE_SMS,
             Manifest.permission.READ_SMS
     };
 
-    ArrayList<WhitelistedContacts> whitelistedContacts;
+//    private WhitelistedContactsAdapter adapter;
+//    private RecyclerView whitelistedContactsView;
+//    ArrayList<WhitelistedContacts> whitelistedContacts;
+
+    private RecyclerView recyclerView;
+    private RecyclerViewAdapter recyclerViewAdapter;
+    private ArrayList<WhitelistedContacts> whitelistedContactsArrayList = new ArrayList<>();
+    private ArrayAdapter<String> arrayAdapter;
+
+    private FloatingActionButton btnAddContact;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        getSupportActionBar().hide();
+
         checkPermissions();
 
-        RecyclerView whitelistedContactsView = findViewById(R.id.whitelistedContactsView);
+        recyclerView = findViewById(R.id.whitelistedContactsView);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        btnAddContact = findViewById(R.id.addContact);
+        btnAddContact.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                Intent contactPickerIntent = new Intent(Intent.ACTION_PICK,
+                        ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
+                startActivityForResult(contactPickerIntent, RESULT_PICK_CONTACT);
+            }
+        });
 
         final DBHandler dbHandler = new DBHandler(this);
-        whitelistedContacts = dbHandler.getContacts();
+        List<WhitelistedContacts> whitelistedContacts = dbHandler.getContacts();
 
-        /// To delete
-        if (whitelistedContacts.size() == 0) {
-            dbHandler.addNewContact("Saish Naik", "+919527767505");
-            dbHandler.addNewContact("Rajdick Kerkar", "+919822975781");
-            whitelistedContacts = dbHandler.getContacts();
+        for (WhitelistedContacts contact: whitelistedContacts) {
+            whitelistedContactsArrayList.add(contact);
         }
 
-        WhitelistedContactsAdapter adapter = new WhitelistedContactsAdapter(whitelistedContacts);
-        whitelistedContactsView.setAdapter(adapter);
-        whitelistedContactsView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewAdapter = new RecyclerViewAdapter(MainActivity.this, whitelistedContactsArrayList);
+        recyclerView.setAdapter(recyclerViewAdapter);
+
+
+//        adapter = new WhitelistedContactsAdapter(whitelistedContacts, this);
+//        whitelistedContactsView = findViewById(R.id.whitelistedContactsView);
+//        whitelistedContactsView.setAdapter(adapter);
+//        whitelistedContactsView.setLayoutManager(new LinearLayoutManager(this));
+////        whitelistedContactsView.setHasFixedSize(true);
     }
 
     protected void checkPermissions() {
@@ -113,10 +151,29 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // Check which request we're responding to
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == MainActivity.ON_DO_NOT_DISTURB_CALLBACK_CODE) {
-            this.requestDNDPermission();
+        switch(requestCode) {
+            case MainActivity.ON_DO_NOT_DISTURB_CALLBACK_CODE:
+                this.requestDNDPermission();
+                break;
+            case RESULT_PICK_CONTACT:
+                Cursor cursor = null;
+                try {
+                    Uri uri = data.getData();
+                    cursor = getContentResolver().query(uri, null, null, null, null);
+                    cursor.moveToFirst();
+                    int phoneIndex = cursor.getColumnIndex(
+                            ContactsContract.CommonDataKinds.Phone.NUMBER);
+                    int nameIndex = cursor.getColumnIndex(
+                            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+                    recyclerViewAdapter.addContact(new WhitelistedContacts(cursor.getString(nameIndex), cursor.getString(phoneIndex)));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    assert cursor != null;
+                    cursor.close();
+                }
+                break;
         }
     }
 }
