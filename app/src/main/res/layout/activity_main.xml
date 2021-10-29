@@ -42,13 +42,14 @@
         app:layout_constraintTop_toBottomOf="@+id/switch2" />
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/whitelistedContactsView"
         android:layout_width="381dp"
         android:layout_height="327dp"
         android:layout_marginLeft="30px"
         android:layout_marginTop="20dp"
         android:layout_marginRight="30px"
-        app:layout_constraintEnd_toEndOf="parent"
         android:scrollbars="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/switch3" />
 

@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.app.NotificationManager;
@@ -27,11 +29,29 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.READ_SMS
     };
 
+    ArrayList<WhitelistedContacts> whitelistedContacts;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         checkPermissions();
+
+        RecyclerView whitelistedContactsView = findViewById(R.id.whitelistedContactsView);
+
+        final DBHandler dbHandler = new DBHandler(this);
+        whitelistedContacts = dbHandler.getContacts();
+
+        /// To delete
+        if (whitelistedContacts.size() == 0) {
+            dbHandler.addNewContact("Saish Naik", "+919527767505");
+            dbHandler.addNewContact("Rajdick Kerkar", "+919822975781");
+            whitelistedContacts = dbHandler.getContacts();
+        }
+
+        WhitelistedContactsAdapter adapter = new WhitelistedContactsAdapter(whitelistedContacts);
+        whitelistedContactsView.setAdapter(adapter);
+        whitelistedContactsView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     protected void checkPermissions() {
