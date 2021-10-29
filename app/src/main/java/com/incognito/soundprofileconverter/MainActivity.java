@@ -112,7 +112,6 @@ public class MainActivity extends AppCompatActivity {
             onRequestPermissionsResult(REQUEST_CODE_ASK_PERMISSIONS, REQUIRED_SDK_PERMISSIONS,
                     grantResults);
         }
-
         requestDNDPermission();
     }
 
