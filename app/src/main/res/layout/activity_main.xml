@@ -7,18 +7,28 @@
     android:background="@color/cardview_light_background"
     tools:context=".MainActivity">
 
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="650dp"
+        android:background="@drawable/dashboard_card"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView2"
+        app:layout_constraintVertical_bias="0.0" />
+
     <Switch
         android:id="@+id/ringerSwitch"
         android:layout_width="match_parent"
         android:layout_height="55dp"
-        android:layout_marginLeft="30px"
+        android:layout_marginLeft="30dp"
         android:layout_marginTop="250dp"
-        android:layout_marginRight="30px"
+        android:layout_marginRight="30dp"
         android:background="@drawable/bg_layout"
         android:padding="30px"
         android:text="Ringer Command"
         android:textColor="@color/black"
-        android:textSize="15dp"
+        android:textSize="18dp"
         app:layout_constraintBottom_toTopOf="@+id/sosSwitch"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.727"
@@ -29,14 +39,14 @@
         android:id="@+id/sosSwitch"
         android:layout_width="match_parent"
         android:layout_height="55dp"
-        android:layout_marginLeft="30px"
+        android:layout_marginLeft="30dp"
         android:layout_marginTop="20dp"
-        android:layout_marginRight="30px"
+        android:layout_marginRight="30dp"
         android:background="@drawable/bg_layout"
         android:padding="30px"
         android:text="SOS Commands"
         android:textColor="@color/black"
-        android:textSize="15dp"
+        android:textSize="18dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.727"
         app:layout_constraintStart_toStartOf="parent"
@@ -44,16 +54,32 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/whitelistedContactsView"
-        android:layout_width="409dp"
-        android:layout_height="268dp"
-        android:layout_marginLeft="30px"
-        android:layout_marginBottom="16dp"
+        android:layout_width="341dp"
+        android:layout_height="257dp"
         android:scrollbars="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/addContact"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/sosSwitch" />
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:background="@drawable/listview"
+        android:padding="20px"
+        android:text="WHITELISTED CONTACTS"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="20dp"
+        app:layout_constraintBottom_toTopOf="@+id/whitelistedContactsView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sosSwitch"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addContact"
@@ -69,24 +95,14 @@
 
     <ImageView
         android:id="@+id/imageView2"
-        android:layout_width="409dp"
+        android:layout_width="match_parent"
         android:layout_height="210dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/photo_2021_10_29_20_03_57"
-        tools:layout_editor_absoluteX="1dp" />
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="WHITELISTED CONTACTS"
-        android:textAlignment="center"
-        android:textColor="@color/black"
-        android:textSize="20dp"
+        app:layout_constraintBottom_toTopOf="@+id/view"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/sosSwitch" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/photo_2021_10_29_20_03_57" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
