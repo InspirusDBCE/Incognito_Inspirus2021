@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:orientation="horizontal"
+    android:layout_height="wrap_content"
+    android:layout_margin="20px"
+    android:padding="20px"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/contact_name"
+        android:textSize="20dp"
+        android:text="Person Name"
+        />
+
+    <TextView
+        android:id="@+id/contact_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Person Number"
+        app:layout_constraintTop_toBottomOf="@+id/contact_name"
+        android:textSize="10dp" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text="Delete"
+        tools:layout_editor_absoluteX="281dp"
+        tools:layout_editor_absoluteY="-1dp" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
