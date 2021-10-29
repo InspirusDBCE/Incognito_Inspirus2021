@@ -9,6 +9,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.app.NotificationManager;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -19,6 +21,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -43,7 +46,9 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int
             ON_DO_NOT_DISTURB_CALLBACK_CODE = 1000,
-            RESULT_PICK_CONTACT = 1001;
+            RESULT_PICK_CONTACT = 1001,
+            ON_DEVICE_ADMIN_CALLBACK_CODE = 1002,
+            ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE = 1003;
 
     private final static int REQUEST_CODE_ASK_PERMISSIONS = 1;
     private static final String[] REQUIRED_SDK_PERMISSIONS = new String[]{
@@ -188,7 +193,10 @@ public class MainActivity extends AppCompatActivity {
             onRequestPermissionsResult(REQUEST_CODE_ASK_PERMISSIONS, REQUIRED_SDK_PERMISSIONS,
                     grantResults);
         }
+
         requestDNDPermission();
+        requestDeviceAdminPermission();
+        requestDrawOverOtherApps();
     }
 
     @Override
@@ -206,8 +214,6 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
                 }
-                // all permissions were granted
-                //initialize();
                 break;
         }
     }
@@ -221,6 +227,26 @@ public class MainActivity extends AppCompatActivity {
             // Ask the user to grant access
             Intent intent = new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
             startActivityForResult(intent, MainActivity.ON_DO_NOT_DISTURB_CALLBACK_CODE );
+        }
+    }
+
+    private void requestDeviceAdminPermission() {
+        DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getSystemService(DEVICE_POLICY_SERVICE);
+        ComponentName compName = new ComponentName(this, LockScreenActivity.class);
+        Log.i("DA", String.valueOf(devicePolicyManager.isAdminActive(compName)));
+
+        if (!devicePolicyManager.isAdminActive(compName)) {
+            Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+            intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName);
+            intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Additional text explaining why we need this permission");
+            startActivityForResult(intent, ON_DEVICE_ADMIN_CALLBACK_CODE);
+        }
+    }
+
+    private void requestDrawOverOtherApps() {
+        if (!Settings.canDrawOverlays(this)) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+            startActivityForResult(intent, ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE);
         }
     }
 
@@ -241,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
                             ContactsContract.CommonDataKinds.Phone.NUMBER);
                     int nameIndex = cursor.getColumnIndex(
                             ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
-                    recyclerViewAdapter.addContact(new WhitelistedContacts(cursor.getString(nameIndex), cursor.getString(phoneIndex)));
+                    recyclerViewAdapter.addContact(new WhitelistedContacts(cursor.getString(nameIndex), cursor.getString(phoneIndex).replaceAll("\\s", "")));
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
