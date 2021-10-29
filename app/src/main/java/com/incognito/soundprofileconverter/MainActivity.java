@@ -13,6 +13,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.location.Location;
@@ -25,6 +26,8 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -54,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String[] REQUIRED_SDK_PERMISSIONS = new String[]{
             Manifest.permission.RECEIVE_SMS,
             Manifest.permission.READ_SMS,
+            Manifest.permission.SEND_SMS,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION
     };
@@ -61,30 +65,16 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
     private ArrayList<WhitelistedContacts> whitelistedContactsArrayList = new ArrayList<>();
-    private ArrayAdapter<String> arrayAdapter;
 
     private FloatingActionButton btnAddContact;
 
-    private FusedLocationProviderClient fusedLocationClient;
-    private LocationRequest locationRequest;
-    private LocationCallback locationCallback;
-    private static final int MILLISECONDS_PER_SECOND = 1000;
-
-    public static final int UPDATE_INTERVAL_IN_SECONDS = 5;
-    private static final long UPDATE_INTERVAL =
-            MILLISECONDS_PER_SECOND * UPDATE_INTERVAL_IN_SECONDS;
-
-    private static final int FASTEST_INTERVAL_IN_SECONDS = 1;
-    private static final long FASTEST_INTERVAL =
-            MILLISECONDS_PER_SECOND * FASTEST_INTERVAL_IN_SECONDS;
-
-    private FirebaseDatabase database;
+    private Switch ringerSwitch;
+    private Switch sosSwitch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         getSupportActionBar().hide();
 
         checkPermissions();
@@ -94,83 +84,37 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         btnAddContact = findViewById(R.id.addContact);
-        btnAddContact.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                Intent contactPickerIntent = new Intent(Intent.ACTION_PICK,
-                        ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
-                startActivityForResult(contactPickerIntent, RESULT_PICK_CONTACT);
-            }
+        btnAddContact.setOnClickListener(arg0 -> {
+            Intent contactPickerIntent = new Intent(Intent.ACTION_PICK,
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
+            startActivityForResult(contactPickerIntent, RESULT_PICK_CONTACT);
+        });
+
+        SharedPreferences sharedPrefs = getSharedPreferences("com.incognito.soundprofileconverter", MODE_PRIVATE);
+
+        ringerSwitch = findViewById(R.id.ringerSwitch);
+        ringerSwitch.setChecked(sharedPrefs.getBoolean("ringerSwitch", true));
+        ringerSwitch.setOnClickListener(arg0 -> {
+            SharedPreferences.Editor editor = sharedPrefs.edit();
+            editor.putBoolean("ringerSwitch", ringerSwitch.isChecked());
+            editor.apply();
+        });
+
+        sosSwitch = findViewById(R.id.sosSwitch);
+        sosSwitch.setChecked(sharedPrefs.getBoolean("sosSwitch", true));
+        sosSwitch.setOnClickListener(arg0 -> {
+            SharedPreferences.Editor editor = sharedPrefs.edit();
+            editor.putBoolean("sosSwitch", sosSwitch.isChecked());
+            editor.apply();
         });
 
         final DBHandler dbHandler = new DBHandler(this);
         List<WhitelistedContacts> whitelistedContacts = dbHandler.getContacts();
 
-        for (WhitelistedContacts contact : whitelistedContacts) {
-            whitelistedContactsArrayList.add(contact);
-        }
+        whitelistedContactsArrayList.addAll(whitelistedContacts);
 
         recyclerViewAdapter = new RecyclerViewAdapter(MainActivity.this, whitelistedContactsArrayList);
         recyclerView.setAdapter(recyclerViewAdapter);
-
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(UPDATE_INTERVAL);
-        locationRequest.setFastestInterval(FASTEST_INTERVAL);
-
-        database = FirebaseDatabase.getInstance();
-        DatabaseReference latitude = database.getReference("latitude");
-        DatabaseReference longitude = database.getReference("longitude");
-
-        locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                if (locationResult == null) {
-                    return;
-                }
-                for (Location location : locationResult.getLocations()) {
-                    latitude.setValue(location.getLatitude());
-                    longitude.setValue(location.getLongitude());
-                    Log.i("Location", "Received" + location.getLatitude() + location.getLongitude());
-                }
-            }
-        };
-    }
-
-    @Override
-    protected void onResume() {
-        boolean requestingLocationUpdates = true;
-        super.onResume();
-        if (requestingLocationUpdates) {
-            startLocationUpdates();
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        stopLocationUpdates();
-    }
-
-    private void stopLocationUpdates() {
-        fusedLocationClient.removeLocationUpdates(locationCallback);
-    }
-
-    private void startLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        fusedLocationClient.requestLocationUpdates(locationRequest,
-                locationCallback,
-                Looper.getMainLooper());
     }
 
     protected void checkPermissions() {

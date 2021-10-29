@@ -3,8 +3,10 @@ package com.incognito.soundprofileconverter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.util.Log;
 
@@ -18,6 +20,7 @@ public class IncomingSms extends BroadcastReceiver {
         // Commands
         final String SET_RINGER = "SET RINGER";
         final String LOCK_DEVICE = "LOCK";
+        final String GET_LOCATION = "GET LOCATION";
 
         final Bundle bundle = intent.getExtras();
 
@@ -54,15 +57,16 @@ public class IncomingSms extends BroadcastReceiver {
                     if (!isWhitelisted)
                         return;
 
-                    if (message.startsWith(SET_RINGER)) {
+                    SharedPreferences sharedPrefs = context.getSharedPreferences("com.incognito.soundprofileconverter", Context.MODE_PRIVATE);
+
+                    if (message.startsWith(SET_RINGER) && sharedPrefs.getBoolean("ringerSwitch", true)) {
                         AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
                         Log.i("SmsReceiver", "Original RingerMode" + audioManager.getRingerMode());
                         int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_RING);
                         audioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
                         Log.i("SmsReceiver", "Now RingerMode" + audioManager.getRingerMode());
                         audioManager.setStreamVolume(AudioManager.STREAM_RING, maxVolume, AudioManager.FLAG_SHOW_UI + AudioManager.FLAG_PLAY_SOUND);
-                    } else if (message.startsWith(LOCK_DEVICE)) {
-                        Log.i("LOCK", "OK");
+                    } else if (message.startsWith(LOCK_DEVICE) && sharedPrefs.getBoolean("sosSwitch", true)) {
                         Intent myIntent = new Intent(context, LockScreenActivity.class);
                         myIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         String messageText;
@@ -74,6 +78,15 @@ public class IncomingSms extends BroadcastReceiver {
 
                         myIntent.putExtra("messageText", messageText);
                         context.startActivity(myIntent);
+                    } else if (message.startsWith(GET_LOCATION) && sharedPrefs.getBoolean("sosSwitch", true)) {
+                        context.startService(new Intent(context, LocationHandler.class));
+                        try {
+                            SmsManager smsManager = SmsManager.getDefault();
+                            String text = "Track Live Location on \n https://soundprofileconverter.web.app/";
+                            smsManager.sendTextMessage(senderNum, null, text, null, null);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
                     }
                 }
             }
