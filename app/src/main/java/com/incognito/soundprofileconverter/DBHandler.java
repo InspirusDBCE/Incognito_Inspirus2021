@@ -83,6 +83,7 @@ public class DBHandler extends SQLiteOpenHelper {
         }
 
         cursor.close();
+        db.close();
         return mcontact;
     }
 
@@ -102,6 +103,7 @@ public class DBHandler extends SQLiteOpenHelper {
         }
 
         cursor.close();
+        db.close();
         return whitelistedContacts;
     }
 }

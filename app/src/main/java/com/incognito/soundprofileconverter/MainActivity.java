@@ -110,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
 
         final DBHandler dbHandler = new DBHandler(this);
         List<WhitelistedContacts> whitelistedContacts = dbHandler.getContacts();
+        dbHandler.close();
 
         whitelistedContactsArrayList.addAll(whitelistedContacts);
 

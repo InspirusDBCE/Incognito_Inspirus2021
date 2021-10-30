@@ -25,7 +25,8 @@ public class IncomingSms extends BroadcastReceiver {
         final Bundle bundle = intent.getExtras();
 
         final DBHandler dbHandler = new DBHandler(context);
-         ArrayList<WhitelistedContacts> whitelistedContacts = dbHandler.getContacts();
+        final ArrayList<WhitelistedContacts> whitelistedContacts = dbHandler.getContacts();
+        dbHandler.close();
 
         try {
 
